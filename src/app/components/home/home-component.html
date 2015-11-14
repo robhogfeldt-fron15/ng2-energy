@@ -1,0 +1,29 @@
+<h1>Home</h1>
+
+<div class="col-sm-3 col-md-2 sidebar">
+	<h2>Meter Info</h2>
+	
+  <div class="meter-info center-block"  [inner-html]="printMeterInfo()"></div>
+
+	
+
+	<!--
+	<h2>Select year</h2>
+	<div style="display:inline-block; min-height:250px;">
+	      <uib-datepicker ng-model="date" format-year="yy" min-mode="year" ng-model="dt" min-date="sidebar.first" max-date="sidebar.last" class="well well-sm" custom-class="getDayClass(date, mode)"></uib-datepicker>
+	</div>
+	-->
+	<div class="btn-group">
+		<button class="btn btn-danger"  (click)="printMeterInfo()">Log out</button>
+		<button class="btn btn-success" ng-click="sidebar.loadVisualizer(date)">Visualize</button>
+	</div>
+	
+	
+		{{meter| json}}
+               
+          
+
+</div>
+<div class="col-sm-6" style="background-color: blue">
+	<homeTest></homeTest>
+</div>

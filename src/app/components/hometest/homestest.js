@@ -12,39 +12,54 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var angular2_1 = require('angular2/angular2');
 var energy_service_1 = require('../../services/energy-service');
 var dateUtil_1 = require('../../utils/dateUtil');
+var charts_1 = require('../charts/charts');
 var HomeTest = (function () {
     function HomeTest(energyService) {
         this.energyService = energyService;
-        console.log('homeTest');
     }
-    // onClick(){
-    //  this.energyService.meter
-    //     .subscribe(
-    //       res => this.meter = res.data,
-    //       err => console.log(err),
-    //       () => console.log(this.meter)    
-    //   );
-    //       console.log(this.meter);
-    // }
-    HomeTest.prototype.onClick = function () {
+    // Daily data 30 days back
+    HomeTest.prototype.onDaysClick = function () {
         var _this = this;
-        // Request daily data 30 days back
         var granularity = 'day';
         var now = new Date();
         var thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        // Create a period with day granularity between 30 days ago and today
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 14);
         var period = dateUtil_1.getPeriod([thirtyDaysAgo, now], granularity);
-        this.consumption = this.energyService.getRange(period)
-            .subscribe(function (res) { return _this.consumption = res.data; }, function (err) { return console.log(err); }, function () { return console.log(_this.consumption); });
+        this.consumption = this.energyService.getRange(period, granularity)
+            .subscribe(function (res) { return _this.consumption = res.data; }, function (err) { return console.log(err); }, function () { return _this.checkValues(_this.consumption[0].periods[0].energy); });
+    };
+    // Monthly data 12 months back
+    HomeTest.prototype.onMonthsClick = function () {
+        var _this = this;
+        var granularity = 'month';
+        var now = new Date();
+        var twelveMonthsAgo = new Date();
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+        var period = dateUtil_1.getPeriod([twelveMonthsAgo, now], granularity);
+        console.log(period);
+        this.consumption = this.energyService.getRange(period, granularity)
+            .subscribe(function (res) { return _this.consumption = res.data; }, function (err) { return console.log(err); }, function () { return _this.checkValues(_this.consumption[0].periods[0].energy); });
+    };
+    // Total consumption/cost
+    HomeTest.prototype.checkValues = function (param) {
+        var json = JSON.parse(localStorage.getItem("price"));
+        var myPrice = parseFloat(json["price"]);
+        console.log(this.consumption[0].periods[0].energy);
+        var total = param.reduce(function (a, b) {
+            return a + b;
+        });
+        var myDate = new Date();
+        this.dataset = param.map(function (v, i) {
+            return { key: myDate.setDate(myDate.getDate() + i), value: v };
+        });
     };
     HomeTest = __decorate([
         angular2_1.Component({
-            selector: "homeTest"
+            selector: "homeTest",
         }),
         angular2_1.View({
-            directives: [angular2_1.CORE_DIRECTIVES],
-            template: '<h1>[Från annan komponent, kolla om denna har tillgån till värdena i servicen.] {{consumption | json}}</h1> <button on-click=onClick()>Klick</button>'
+            directives: [angular2_1.CORE_DIRECTIVES, charts_1.BarGraph],
+            template: "\n  <button class=\"btn btn-success\"  (click)=\"onMonthsClick()\">12Months</button><button class=\"btn btn-success\"  (click)=\"onDaysClick()\">30Days</button>\n    <bar-graph id=\"bar-graph\" [graphdata]=\"dataset\"></bar-graph>\n  "
         }), 
         __metadata('design:paramtypes', [energy_service_1.EnergyService])
     ], HomeTest);
